@@ -34,6 +34,11 @@ export async function createEvent(data: {
   try {
     console.log("[createEvent] start", { auth_type: data.auth_type, expiry: data.expiry });
 
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "(undefined)";
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "(undefined)";
+    console.log("[createEvent] SUPABASE_URL prefix:", url.slice(0, 30));
+    console.log("[createEvent] ANON_KEY defined:", key !== "(undefined)", "length:", key.length);
+
     const supabase = await createClient();
     console.log("[createEvent] supabase client created");
 
