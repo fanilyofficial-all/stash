@@ -32,23 +32,13 @@ export async function createEvent(data: {
   expiry: ExpiryOption;
 }): Promise<{ slug: string } | { error: string }> {
   try {
-    console.log("[createEvent] start", { auth_type: data.auth_type, expiry: data.expiry });
-
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "(undefined)";
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "(undefined)";
-    console.log("[createEvent] SUPABASE_URL prefix:", url.slice(0, 30));
-    console.log("[createEvent] ANON_KEY defined:", key !== "(undefined)", "length:", key.length);
-
     const supabase = await createClient();
-    console.log("[createEvent] supabase client created");
 
     const slug = randomBytes(6).toString("base64url");
-    console.log("[createEvent] slug generated:", slug);
 
     let hashedCode: string | null = null;
     if (data.auth_type === "code" && data.access_code.length === 6) {
       hashedCode = hashCode(data.access_code);
-      console.log("[createEvent] code hashed");
     }
 
     const { error } = await supabase.from("events").insert({
@@ -61,15 +51,10 @@ export async function createEvent(data: {
       expires_at: getExpiresAt(data.expiry),
     });
 
-    if (error) {
-      console.error("[createEvent] supabase insert error:", error);
-      return { error: error.message };
-    }
+    if (error) return { error: error.message };
 
-    console.log("[createEvent] success, slug:", slug);
     return { slug };
   } catch (err) {
-    console.error("[createEvent] unexpected error:", err);
     return { error: String(err) };
   }
 }
