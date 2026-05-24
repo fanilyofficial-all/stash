@@ -1,6 +1,6 @@
 "use server";
 
-import { nanoid } from "nanoid";
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { createClient } from "@/lib/supabase/server";
 import type { ExpiryOption } from "@/lib/types";
@@ -28,7 +28,7 @@ export async function createEvent(data: {
 }): Promise<{ slug: string } | { error: string }> {
   const supabase = await createClient();
 
-  const slug = nanoid(8);
+  const slug = randomBytes(6).toString("base64url");
 
   let hashedCode: string | null = null;
   if (data.auth_type === "code" && data.access_code.length === 6) {
