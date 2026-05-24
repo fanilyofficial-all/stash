@@ -1,6 +1,6 @@
 "use server";
 
-import { randomBytes, scryptSync } from "crypto";
+import { randomBytes, scryptSync } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import type { ExpiryOption } from "@/lib/types";
 

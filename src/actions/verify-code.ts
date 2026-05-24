@@ -1,6 +1,6 @@
 "use server";
 
-import { scryptSync, timingSafeEqual } from "crypto";
+import { scryptSync, timingSafeEqual } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 
 function checkCode(stored: string, code: string): boolean {
