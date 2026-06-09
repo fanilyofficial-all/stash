@@ -13,8 +13,31 @@ import {
 import { uploadPhoto } from "@/actions/upload-photo";
 
 const UPLOAD_LIMIT = 10;
+const MAX_PX = 1920;
+const JPEG_QUALITY = 0.8;
 
 type FileStatus = "pending" | "uploading" | "done" | "error";
+
+function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, MAX_PX / Math.max(img.naturalWidth, img.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => resolve(new File([blob!], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" })),
+        "image/jpeg",
+        JPEG_QUALITY,
+      );
+    };
+    img.src = url;
+  });
+}
 
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
@@ -63,15 +86,22 @@ export default function UploadModal({
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
 
-    const available = Math.min(files.length, remaining);
-    const chosen = files.slice(0, available);
-
-    const urls = chosen.map((f) => URL.createObjectURL(f));
-    setSelectedFiles(chosen);
-    setPreviewUrls(urls);
-    setStatuses(chosen.map(() => "pending"));
-
     if (fileInputRef.current) fileInputRef.current.value = "";
+
+    setSelectedFiles((prev) => {
+      const slots = Math.max(0, remaining - prev.length);
+      const chosen = files.slice(0, slots);
+      return [...prev, ...chosen];
+    });
+    setPreviewUrls((prev) => {
+      const slots = Math.max(0, remaining - prev.length);
+      const chosen = files.slice(0, slots);
+      return [...prev, ...chosen.map((f) => URL.createObjectURL(f))];
+    });
+    setStatuses((prev) => {
+      const slots = Math.max(0, remaining - prev.length);
+      return [...prev, ...Array(Math.min(files.length, slots)).fill("pending")];
+    });
   }
 
   function removeFile(index: number) {
@@ -85,27 +115,21 @@ export default function UploadModal({
     if (!selectedFiles.length || isUploading) return;
 
     setIsUploading(true);
+    setStatuses(selectedFiles.map(() => "uploading"));
     const sessionId = getSessionId();
 
-    for (let i = 0; i < selectedFiles.length; i++) {
-      setStatuses((prev) => {
-        const next = [...prev];
-        next[i] = "uploading";
-        return next;
-      });
-
-      const result = await uploadPhoto(selectedFiles[i], eventId, sessionId);
-
-      setStatuses((prev) => {
-        const next = [...prev];
-        next[i] = "error" in result ? "error" : "done";
-        return next;
-      });
-
-      if (!("error" in result)) {
-        incrementUploadCount(slug);
-      }
-    }
+    await Promise.all(
+      selectedFiles.map(async (file, i) => {
+        const compressed = await compressImage(file);
+        const result = await uploadPhoto(compressed, eventId, sessionId);
+        setStatuses((prev) => {
+          const next = [...prev];
+          next[i] = "error" in result ? "error" : "done";
+          return next;
+        });
+        if (!("error" in result)) incrementUploadCount(slug);
+      })
+    );
 
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
     setIsUploading(false);

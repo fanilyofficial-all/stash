@@ -226,7 +226,7 @@ export default function CreateEventForm() {
       {/* Submit */}
       <button
         type="button"
-        disabled={!name.trim() || isPending}
+        disabled={!name.trim() || isPending || (authType === "code" && pin.some((d) => d === ""))}
         onClick={handleSubmit}
         onTouchEnd={(e) => { e.preventDefault(); handleSubmit(); }}
         className="h-[52px] w-full rounded-pill bg-accent text-white text-[16px] font-medium flex items-center justify-center gap-2 transition-opacity disabled:opacity-40"
