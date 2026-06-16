@@ -115,14 +115,15 @@ export default function Home() {
           Simple as it gets.
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3">
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max md:grid md:grid-cols-3 md:min-w-0">
           {steps.map((step, i) => (
             <div
               key={step.num}
               className={[
-                "py-8 md:py-0",
-                i > 0 ? "border-t border-border md:border-t-0 md:border-l md:pl-10" : "",
-                i < 2 ? "md:pr-10" : "",
+                "w-[260px] md:w-auto",
+                i > 0 ? "border-l border-border pl-8 md:pl-10" : "",
+                i < 2 ? "pr-8 md:pr-10" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -141,6 +142,7 @@ export default function Home() {
               </p>
             </div>
           ))}
+          </div>
         </div>
       </section>
 
