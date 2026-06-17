@@ -16,6 +16,8 @@ export type Photo = {
   id: string;
   event_id: string;
   storage_path: string;
+  display_path: string | null;
+  original_path: string | null;
   uploader_session_id: string | null;
   uploaded_at: string;
   signed_url?: string;

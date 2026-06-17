@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getEvent } from "@/actions/get-event";
 import type { Event } from "@/lib/types";
 import EventHeader from "./event-header";
-import PhotoGrid from "./photo-grid";
+import GalleryClientShell from "./gallery-client";
 import UploadFab from "./upload-fab";
 import CodeGate from "./code-gate";
 import ShareBanner from "./share-banner";
@@ -95,9 +95,9 @@ export default async function EventGallery({
 
       <hr className="border-border mx-6 md:mx-10 mb-1" />
 
-      <PhotoGrid photos={photos} allowDownload={event.allow_download} />
-
-      <UploadFab eventId={event.id} slug={slug} />
+      <GalleryClientShell initialPhotos={photos} allowDownload={event.allow_download}>
+        <UploadFab eventId={event.id} slug={slug} />
+      </GalleryClientShell>
     </main>
   );
 }

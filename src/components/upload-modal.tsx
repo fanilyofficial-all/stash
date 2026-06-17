@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { UploadCloud, X } from "lucide-react";
 import {
   Sheet,
@@ -10,7 +9,8 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { uploadPhoto } from "@/actions/upload-photo";
+import { uploadDisplayPhoto, uploadOriginalPhoto } from "@/actions/upload-photo";
+import { useGalleryContext } from "./gallery-client";
 
 const UPLOAD_LIMIT = 10;
 const MAX_PX = 1920;
@@ -70,7 +70,7 @@ export default function UploadModal({
   eventId: string;
   slug: string;
 }) {
-  const router = useRouter();
+  const { addOptimisticPhoto, onAllUploaded } = useGalleryContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -120,14 +120,21 @@ export default function UploadModal({
 
     await Promise.all(
       selectedFiles.map(async (file, i) => {
-        const compressed = await compressImage(file);
-        const result = await uploadPhoto(compressed, eventId, sessionId);
+        const displayFile = await compressImage(file);
+        const result = await uploadDisplayPhoto(displayFile, eventId, sessionId);
+
         setStatuses((prev) => {
           const next = [...prev];
           next[i] = "error" in result ? "error" : "done";
           return next;
         });
-        if (!("error" in result)) incrementUploadCount(slug);
+
+        if (!("error" in result)) {
+          incrementUploadCount(slug);
+          addOptimisticPhoto(result.photo);
+          // Upload original in background — don't await
+          uploadOriginalPhoto(file, eventId, result.photo.id).catch(() => {});
+        }
       })
     );
 
@@ -137,10 +144,8 @@ export default function UploadModal({
     setPreviewUrls([]);
     setStatuses([]);
     onOpenChange(false);
-    router.refresh();
+    onAllUploaded();
   }
-
-  const pendingCount = selectedFiles.filter((_, i) => statuses[i] === "pending").length;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

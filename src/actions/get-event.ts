@@ -26,9 +26,10 @@ export async function getEvent(
   const admin = createAdminClient();
   const photosWithUrls: Photo[] = await Promise.all(
     (photos || []).map(async (photo) => {
+      const displayPath = photo.display_path ?? photo.storage_path;
       const { data } = await admin.storage
         .from("stash-photos")
-        .createSignedUrl(photo.storage_path, 86400);
+        .createSignedUrl(displayPath, 86400);
       return { ...photo, signed_url: data?.signedUrl ?? undefined };
     })
   );
