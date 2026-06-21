@@ -15,7 +15,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "stash",
-  description: "Drop your shots. Everyone gets the good ones.",
+  description: "Capture your shots. Everyone gets the good ones.",
 };
 
 export default function RootLayout({
