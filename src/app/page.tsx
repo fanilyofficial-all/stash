@@ -115,7 +115,7 @@ export default function Home() {
 
       {/* Marquee */}
       <div style={{ background: "#141414", padding: "14px 0", overflow: "hidden", width: "100%" }}>
-        <div style={{ display: "flex", animation: "marquee-scroll 20s linear infinite", willChange: "transform" }}>
+        <div style={{ display: "flex", animation: "marquee-scroll 8s linear infinite", willChange: "transform" }}>
           {[0, 1].map((copy) => (
             <div key={copy} style={{ display: "flex", flexShrink: 0, alignItems: "center" }}>
               {["birthdays", "weddings", "house parties", "rooftop nights", "trips", "festivals", "sunsets", "after parties"].map((item) => (
