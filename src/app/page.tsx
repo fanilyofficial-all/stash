@@ -58,10 +58,10 @@ export default function Home() {
       `}</style>
 
       {/* Hero fold — fills exactly the viewport on mobile so the marquee is always visible */}
-      <div className="flex flex-col min-h-dvh md:block">
+      <div className="flex flex-col min-h-dvh">
 
       {/* Hero */}
-      <section className="relative flex-1 flex flex-col items-start justify-center bg-bg px-6 md:px-10 md:min-h-screen">
+      <section className="relative flex-1 flex flex-col items-start justify-center bg-bg px-6 md:px-10">
         <header className="absolute top-0 left-0 px-6 md:px-10 pt-6">
           <span
             className="font-sans font-medium text-[15px] text-text-primary"
