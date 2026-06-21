@@ -57,8 +57,11 @@ export default function Home() {
         }
       `}</style>
 
+      {/* Hero fold — fills exactly the viewport on mobile so the marquee is always visible */}
+      <div className="flex flex-col min-h-dvh md:block">
+
       {/* Hero */}
-      <section className="relative min-h-screen flex flex-col items-start justify-center bg-bg px-6 md:px-10">
+      <section className="relative flex-1 flex flex-col items-start justify-center bg-bg px-6 md:px-10 md:min-h-screen">
         <header className="absolute top-0 left-0 px-6 md:px-10 pt-6">
           <span
             className="font-sans font-medium text-[15px] text-text-primary"
@@ -68,7 +71,7 @@ export default function Home() {
           </span>
         </header>
 
-        <div className="w-full max-w-[700px] py-24">
+        <div className="w-full max-w-[700px] py-16 md:py-24">
           <h1
             className="font-display font-light text-[48px] md:text-[72px] lg:text-[88px] leading-[1.05] text-text-primary"
             style={{
@@ -125,6 +128,8 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      </div>{/* end hero fold wrapper */}
 
       {/* How it works */}
       <section className="bg-bg border-t border-border px-6 md:px-10 py-20 md:py-28">
