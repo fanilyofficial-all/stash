@@ -51,6 +51,10 @@ export default function Home() {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
       `}</style>
 
       {/* Hero */}
@@ -105,6 +109,22 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Marquee */}
+      <div style={{ background: "#141414", padding: "14px 0", overflow: "hidden", width: "100%" }}>
+        <div style={{ display: "flex", animation: "marquee-scroll 20s linear infinite", willChange: "transform" }}>
+          {[0, 1].map((copy) => (
+            <div key={copy} style={{ display: "flex", flexShrink: 0, alignItems: "center" }}>
+              {["birthdays", "weddings", "house parties", "rooftop nights", "trips", "festivals", "sunsets", "after parties"].map((item) => (
+                <span key={item} style={{ display: "inline-flex", alignItems: "center" }}>
+                  <span className="font-display" style={{ fontStyle: "italic", fontWeight: 300, fontSize: "18px", color: "#F7F5F2", whiteSpace: "nowrap", padding: "0 18px" }}>{item}</span>
+                  <span style={{ color: "#4A2D6F", fontSize: "18px", lineHeight: 1 }}>✦</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* How it works */}
       <section className="bg-bg border-t border-border px-6 md:px-10 py-20 md:py-28">
