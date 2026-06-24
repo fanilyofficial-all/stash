@@ -91,7 +91,7 @@ export default async function EventGallery({
 
       {WORDMARK}
 
-      <EventHeader event={event} slug={slug} photoCount={photos.length} />
+      <EventHeader event={event} photoCount={photos.length} />
 
       <hr className="border-border mx-6 md:mx-10 mb-1" />
 

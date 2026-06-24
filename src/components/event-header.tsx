@@ -1,7 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { Clock, Share2 } from "lucide-react";
+import { Clock } from "lucide-react";
 import type { Event } from "@/lib/types";
 
 function formatExpiry(expiresAt: string | null): string {
@@ -12,38 +9,11 @@ function formatExpiry(expiresAt: string | null): string {
 
 export default function EventHeader({
   event,
-  slug,
   photoCount,
 }: {
   event: Event;
-  slug: string;
   photoCount: number;
 }) {
-  const [copied, setCopied] = useState(false);
-
-  const url =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/${slug}`
-      : `/${slug}`;
-
-  async function share() {
-    if (navigator.canShare && navigator.canShare()) {
-      try {
-        await navigator.share({
-          title: event.name,
-          text: "Drop your photos in my stash",
-          url,
-        });
-        return;
-      } catch {
-        // User cancelled or share failed — fall through to clipboard
-      }
-    }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   return (
     <div className="px-6 md:px-10 pt-8 pb-4">
       <h1
@@ -69,14 +39,6 @@ export default function EventHeader({
         <span>
           {photoCount} {photoCount === 1 ? "photo" : "photos"}
         </span>
-        <button
-          onClick={share}
-          title={copied ? "Link copied" : "Share stash"}
-          className="stash-btn-press ml-auto flex items-center gap-1.5 text-text-secondary"
-        >
-          <Share2 size={14} />
-          <span className="text-[13px]">{copied ? "Copied" : "Share"}</span>
-        </button>
       </div>
     </div>
   );

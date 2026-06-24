@@ -14,17 +14,23 @@ export default function ShareBanner({ slug, eventName }: { slug: string; eventNa
       ? `${window.location.origin}/${slug}`
       : `/${slug}`;
 
+  const shareData = {
+    title: eventName,
+    text: "Drop your photos in my stash",
+    url,
+  };
+
   async function share() {
-    if (navigator.canShare && navigator.canShare()) {
+    // Check navigator.share directly — canShare() with no args returns false
+    // on some iOS versions even when share is fully supported.
+    if (navigator.share) {
       try {
-        await navigator.share({
-          title: eventName,
-          text: "Drop your photos in my stash",
-          url,
-        });
+        await navigator.share(shareData);
         return;
-      } catch {
-        // User cancelled or share failed — fall through to clipboard
+      } catch (err) {
+        // User dismissed the share sheet — don't fall through to clipboard.
+        if (err instanceof Error && err.name === "AbortError") return;
+        // Any other error (permissions, unsupported data): fall through.
       }
     }
     await navigator.clipboard.writeText(url);
@@ -38,9 +44,8 @@ export default function ShareBanner({ slug, eventName }: { slug: string; eventNa
       <span className="text-text-primary flex-1">Your stash is live.</span>
       <button
         onClick={share}
-        className="stash-btn-press flex items-center gap-1.5 h-[32px] px-4 rounded-pill bg-accent text-white text-[13px] font-medium shrink-0"
+        className="text-accent font-medium shrink-0 underline underline-offset-2"
       >
-        <Share2 size={12} />
         {copied ? "Link copied" : "Share stash"}
       </button>
       <button
