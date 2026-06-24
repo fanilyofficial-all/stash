@@ -101,6 +101,78 @@
   40%, 80% { transform: translateX(6px); }
 }
 
+/* ─── Create event form ───────────────────────────────────────── */
+
+/* "More options" toggle link */
+.stash-more-options {
+  font-size: 13px;
+  font-weight: 500;
+  color: #7A7570;
+  transition: color 150ms ease-out;
+}
+
+/* Advanced section: CSS grid 0fr→1fr height animation */
+.stash-advanced-section {
+  display: grid;
+  transition: grid-template-rows 300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* PIN reveal: height + opacity together */
+.stash-pin-reveal {
+  display: grid;
+  transition:
+    grid-template-rows 250ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Toggle / expiry pills: smooth bg, text, border on active swap */
+.stash-pill {
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    border-color 150ms ease-out,
+    opacity 150ms ease-out;
+}
+
+/* PIN digit boxes */
+.stash-pin-input {
+  transition: border-color 150ms ease-out;
+}
+
+/* Submit button: opacity + press scale */
+.stash-submit {
+  transition: opacity 200ms ease-out, transform 160ms ease-out;
+}
+.stash-submit:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* ── Hover states — pointer devices only ──────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .stash-more-options:hover {
+    color: #141414;
+  }
+  .stash-pill:hover {
+    opacity: 0.8;
+  }
+}
+
+/* ── Reduced motion — skip transforms, keep opacity ───────────── */
+@media (prefers-reduced-motion: reduce) {
+  .stash-advanced-section {
+    transition: none;
+  }
+  .stash-pin-reveal {
+    transition: opacity 250ms ease-out;
+  }
+  .stash-submit {
+    transition: opacity 200ms ease-out;
+  }
+  .stash-submit:not(:disabled):active {
+    transform: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

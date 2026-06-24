@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createEvent } from "@/actions/create-event";
@@ -17,6 +17,14 @@ const EXPIRY_OPTIONS: { label: string; value: ExpiryOption }[] = [
 const inputClass =
   "h-[52px] w-full rounded-input border border-border bg-surface px-4 text-[15px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent transition-colors";
 
+function pillClass(active: boolean) {
+  return `stash-pill flex-1 h-[44px] rounded-pill text-[13px] font-medium border ${
+    active
+      ? "bg-accent border-accent text-white"
+      : "border-[#141414] bg-transparent text-text-primary"
+  }`;
+}
+
 export default function CreateEventForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -28,8 +36,22 @@ export default function CreateEventForm() {
   const [allowDownload, setAllowDownload] = useState(true);
   const [expiry, setExpiry] = useState<ExpiryOption>("7d");
   const [error, setError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [pinFlash, setPinFlash] = useState(false);
 
   const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const pinComplete = pin.every((d) => d !== "");
+  const isDisabled = !name.trim() || isPending || (authType === "code" && !pinComplete);
+
+  // Brief accent flash on all PIN boxes when code is complete
+  useEffect(() => {
+    if (pinComplete && authType === "code") {
+      setPinFlash(true);
+      const t = setTimeout(() => setPinFlash(false), 500);
+      return () => clearTimeout(t);
+    }
+  }, [pinComplete, authType]);
 
   function handlePinChange(index: number, value: string) {
     if (value.length > 1) {
@@ -55,7 +77,7 @@ export default function CreateEventForm() {
   }
 
   function handleSubmit() {
-    if (!name.trim() || isPending) return;
+    if (isDisabled) return;
     setError(null);
 
     startTransition(async () => {
@@ -77,15 +99,8 @@ export default function CreateEventForm() {
     });
   }
 
-  function toggleButton(active: boolean) {
-    return active
-      ? "bg-accent text-white"
-      : "border border-text-primary bg-transparent text-text-primary";
-  }
-
   // iOS Safari: touchend fires before scroll-detection can cancel the gesture.
   // e.preventDefault() suppresses the synthetic click to avoid double-firing.
-  // Also using onClick as a fallback for non-touch environments.
   function touchHandler<T>(action: (v: T) => void, value: T) {
     return {
       onClick: () => action(value),
@@ -93,10 +108,9 @@ export default function CreateEventForm() {
     };
   }
 
-  // Use a div instead of form — iOS Safari intercepts touch events differently
-  // for <button type="button"> elements inside <form> elements (WebKit bug).
   return (
     <div role="form" className="flex flex-col gap-6">
+
       {/* Event name */}
       <input
         type="text"
@@ -117,105 +131,123 @@ export default function CreateEventForm() {
         className="w-full rounded-input border border-border bg-surface px-4 py-3 text-[15px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent transition-colors resize-none"
       />
 
-      {/* Who can upload */}
-      <div className="flex flex-col gap-3">
-        <p className="text-[13px] font-medium text-text-secondary">
-          Who can upload?
-        </p>
-        <div className="flex gap-2">
-          {(
-            [
-              { label: "Anyone with the link", value: "open" },
-              { label: "Link + access code", value: "code" },
-            ] as const
-          ).map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              {...touchHandler(setAuthType, opt.value)}
-              className={`flex-1 h-[44px] rounded-pill text-[13px] font-medium transition-colors ${toggleButton(authType === opt.value)}`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        {/* PIN inputs — animated in/out */}
-        {/* pointer-events-none when collapsed: iOS WebKit doesn't clip touch targets
-            for overflow:hidden containers that have transition-all applied */}
-        <div
-          className={`overflow-hidden transition-all duration-300 ${
-            authType === "code"
-              ? "max-h-[160px] opacity-100"
-              : "max-h-0 opacity-0 pointer-events-none"
-          }`}
-          style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
+      {/* Advanced options — toggle + collapsible section */}
+      <div className="flex flex-col">
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((v) => !v)}
+          className="stash-more-options self-start mb-4"
+          aria-expanded={showAdvanced}
         >
-          <div className="pt-1 flex flex-col gap-3">
-            <p className="text-[13px] font-medium text-text-secondary">
-              Set a 6-digit code
-            </p>
-            <div className="flex gap-2">
-              {pin.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={(el) => {
-                    pinRefs.current[i] = el;
+          {showAdvanced ? "Fewer options ↑" : "More options ↓"}
+        </button>
+
+        {/* CSS grid trick: animate grid-template-rows 0fr → 1fr for smooth height */}
+        <div
+          className="stash-advanced-section"
+          style={{ gridTemplateRows: showAdvanced ? "1fr" : "0fr" }}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="flex flex-col gap-6 pb-1">
+
+              {/* Who can upload */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[13px] font-medium text-text-secondary">Who can upload?</p>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      { label: "Anyone with the link", value: "open" },
+                      { label: "Link + access code", value: "code" },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      {...touchHandler(setAuthType, opt.value)}
+                      className={pillClass(authType === opt.value)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* PIN reveal — slides down when "Link + access code" is selected */}
+                <div
+                  className="stash-pin-reveal"
+                  style={{
+                    gridTemplateRows: authType === "code" ? "1fr" : "0fr",
+                    opacity: authType === "code" ? 1 : 0,
                   }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={digit}
-                  onChange={(e) => handlePinChange(i, e.target.value)}
-                  onKeyDown={(e) => handlePinKeyDown(i, e)}
-                  className="min-w-0 flex-1 h-[64px] rounded-input border border-border bg-surface text-center text-xl font-medium text-text-primary focus:outline-none focus:border-accent transition-colors"
-                />
-              ))}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div
+                      className="pt-3 flex flex-col gap-3"
+                      style={{ pointerEvents: authType === "code" ? "auto" : "none" }}
+                    >
+                      <p className="text-[13px] font-medium text-text-secondary">Set a 6-digit code</p>
+                      <div className="flex gap-2">
+                        {pin.map((digit, i) => (
+                          <input
+                            key={i}
+                            ref={(el) => { pinRefs.current[i] = el; }}
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={6}
+                            value={digit}
+                            onChange={(e) => handlePinChange(i, e.target.value)}
+                            onKeyDown={(e) => handlePinKeyDown(i, e)}
+                            className={`stash-pin-input min-w-0 flex-1 h-[64px] rounded-input border bg-surface text-center text-xl font-medium text-text-primary focus:outline-none ${
+                              pinFlash ? "border-accent" : "border-border focus:border-accent"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Can guests download photos */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[13px] font-medium text-text-secondary">Can guests download photos?</p>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      { label: "Yes", value: true },
+                      { label: "No", value: false },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      {...touchHandler(setAllowDownload, opt.value)}
+                      className={pillClass(allowDownload === opt.value)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stash closes in */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[13px] font-medium text-text-secondary">Stash closes in</p>
+                <div className="flex gap-1.5">
+                  {EXPIRY_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      {...touchHandler(setExpiry, opt.value)}
+                      className={pillClass(expiry === opt.value)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Download permission */}
-      <div className="flex flex-col gap-3">
-        <p className="text-[13px] font-medium text-text-secondary">
-          Can guests download photos?
-        </p>
-        <div className="flex gap-2">
-          {(
-            [
-              { label: "Yes", value: true },
-              { label: "No", value: false },
-            ] as const
-          ).map((opt) => (
-            <button
-              key={String(opt.value)}
-              type="button"
-              {...touchHandler(setAllowDownload, opt.value)}
-              className={`flex-1 h-[44px] rounded-pill text-[13px] font-medium transition-colors ${toggleButton(allowDownload === opt.value)}`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Expiry */}
-      <div className="flex flex-col gap-3">
-        <p className="text-[13px] font-medium text-text-secondary">
-          Stash closes in
-        </p>
-        <div className="flex gap-1.5">
-          {EXPIRY_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              {...touchHandler(setExpiry, opt.value)}
-              className={`flex-1 h-[44px] rounded-pill text-[13px] font-medium transition-colors ${toggleButton(expiry === opt.value)}`}
-            >
-              {opt.label}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -226,16 +258,14 @@ export default function CreateEventForm() {
       {/* Submit */}
       <button
         type="button"
-        disabled={!name.trim() || isPending || (authType === "code" && pin.some((d) => d === ""))}
+        disabled={isDisabled}
         onClick={handleSubmit}
         onTouchEnd={(e) => { e.preventDefault(); handleSubmit(); }}
-        className="h-[52px] w-full rounded-pill bg-accent text-white text-[16px] font-medium flex items-center justify-center gap-2 transition-opacity disabled:opacity-40"
+        className="stash-submit h-[52px] w-full rounded-pill bg-accent text-white text-[16px] font-medium flex items-center justify-center"
+        style={{ opacity: isDisabled ? 0.4 : 1 }}
       >
         {isPending ? (
-          <>
-            <Loader2 size={18} className="animate-spin" />
-            Creating...
-          </>
+          <Loader2 size={18} className="animate-spin" />
         ) : (
           "Create stash"
         )}
