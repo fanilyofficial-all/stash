@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Share2, X } from "lucide-react";
 
-export default function ShareBanner({ slug }: { slug: string }) {
+export default function ShareBanner({ slug, eventName }: { slug: string; eventName: string }) {
   const [visible, setVisible] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -14,7 +14,19 @@ export default function ShareBanner({ slug }: { slug: string }) {
       ? `${window.location.origin}/${slug}`
       : `/${slug}`;
 
-  async function copy() {
+  async function share() {
+    if (navigator.canShare && navigator.canShare()) {
+      try {
+        await navigator.share({
+          title: eventName,
+          text: "Drop your photos in my stash",
+          url,
+        });
+        return;
+      } catch {
+        // User cancelled or share failed — fall through to clipboard
+      }
+    }
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -25,10 +37,11 @@ export default function ShareBanner({ slug }: { slug: string }) {
       <Share2 size={14} className="text-accent shrink-0" />
       <span className="text-text-primary flex-1">Your stash is live.</span>
       <button
-        onClick={copy}
-        className="font-medium text-accent shrink-0"
+        onClick={share}
+        className="stash-btn-press flex items-center gap-1.5 h-[32px] px-4 rounded-pill bg-accent text-white text-[13px] font-medium shrink-0"
       >
-        {copied ? "Copied!" : "Copy link"}
+        <Share2 size={12} />
+        {copied ? "Link copied" : "Share stash"}
       </button>
       <button
         onClick={() => setVisible(false)}

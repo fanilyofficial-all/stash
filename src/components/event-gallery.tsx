@@ -87,11 +87,11 @@ export default async function EventGallery({
 
   return (
     <main className="min-h-screen bg-bg pb-32">
-      {showShareBanner && <ShareBanner slug={slug} />}
+      {showShareBanner && <ShareBanner slug={slug} eventName={event.name} />}
 
       {WORDMARK}
 
-      <EventHeader event={event} photoCount={photos.length} />
+      <EventHeader event={event} slug={slug} photoCount={photos.length} />
 
       <hr className="border-border mx-6 md:mx-10 mb-1" />
 

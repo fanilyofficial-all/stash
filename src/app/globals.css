@@ -147,6 +147,14 @@
   transform: scale(0.97);
 }
 
+/* Reusable press feedback for share buttons */
+.stash-btn-press {
+  transition: transform 150ms ease-out, opacity 150ms ease-out;
+}
+.stash-btn-press:active {
+  transform: scale(0.97);
+}
+
 /* ── Hover states — pointer devices only ──────────────────────── */
 @media (hover: hover) and (pointer: fine) {
   .stash-more-options:hover {
@@ -168,7 +176,8 @@
   .stash-submit {
     transition: opacity 200ms ease-out;
   }
-  .stash-submit:not(:disabled):active {
+  .stash-submit:not(:disabled):active,
+  .stash-btn-press:active {
     transform: none;
   }
 }
