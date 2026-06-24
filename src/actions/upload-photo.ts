@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Photo } from "@/lib/types";
 
+const UPLOAD_LIMIT = 10;
+
 export async function uploadDisplayPhoto(
   displayFile: File,
   eventId: string,
@@ -11,6 +13,36 @@ export async function uploadDisplayPhoto(
 ): Promise<{ photo: Photo } | { error: string }> {
   const supabase = await createClient();
   const admin = createAdminClient();
+
+  // Check event exists and hasn't expired
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("id, expires_at")
+    .eq("id", eventId)
+    .single();
+
+  if (eventError || !event) {
+    return { error: "Event not found." };
+  }
+
+  if (event.expires_at && new Date(event.expires_at) < new Date()) {
+    return { error: "This event has expired and is no longer accepting uploads." };
+  }
+
+  // Enforce per-session upload limit server-side
+  const { count, error: countError } = await supabase
+    .from("photos")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", eventId)
+    .eq("uploader_session_id", sessionId);
+
+  if (countError) {
+    return { error: "Could not verify upload limit. Please try again." };
+  }
+
+  if ((count ?? 0) >= UPLOAD_LIMIT) {
+    return { error: `You've reached the limit of ${UPLOAD_LIMIT} photos per event.` };
+  }
 
   const timestamp = Date.now();
   const displayPath = `${eventId}/display/${timestamp}-${displayFile.name}`;

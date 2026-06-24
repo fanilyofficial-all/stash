@@ -41,10 +41,13 @@ export async function createEvent(data: {
       hashedCode = hashCode(data.access_code);
     }
 
+    const sanitizedName = data.name.replace(/<[^>]*>/g, "").trim();
+    const sanitizedMessage = data.message.replace(/<[^>]*>/g, "").trim();
+
     const { error } = await supabase.from("events").insert({
       slug,
-      name: data.name,
-      message: data.message || null,
+      name: sanitizedName,
+      message: sanitizedMessage || null,
       auth_type: data.auth_type,
       access_code: hashedCode,
       allow_download: data.allow_download,
