@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Lock, Clock, Zap, Download } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import HeroConfetti from "@/components/hero-confetti";
 
 const steps = [
   {
@@ -56,6 +57,8 @@ export default function Home() {
           to   { transform: translateX(-50%); }
         }
       `}</style>
+
+      <HeroConfetti />
 
       {/* Hero fold — fills exactly the viewport on mobile so the marquee is always visible */}
       <div className="flex flex-col min-h-dvh">
