@@ -80,7 +80,7 @@ export default function Home() {
               animationDelay: "0ms",
             }}
           >
-            <span className="block">Capture your shots.</span>
+            <span className="block">Drop your shots.</span>
             <span className="block italic">Everyone gets</span>
             <span className="block">the good ones.</span>
           </h1>
