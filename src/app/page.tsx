@@ -83,8 +83,8 @@ export default function Home() {
               animationDelay: "0ms",
             }}
           >
-            <span className="block">One night.</span>
-            <span className="block italic">One place.</span>
+            <span className="block">All night.</span>
+            <span className="block italic">All places.</span>
             <span className="block">Everyone's photos.</span>
           </h1>
 
