@@ -91,7 +91,7 @@ export default function CreateEventForm() {
       });
 
       if ("error" in result) {
-        setError("Something went wrong. Try again.");
+        setError(result.error);
         return;
       }
 
