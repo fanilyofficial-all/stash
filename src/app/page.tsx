@@ -80,9 +80,9 @@ export default function Home() {
               animationDelay: "0ms",
             }}
           >
-            <span className="block">Capture your shots.</span>
-            <span className="block italic">Everyone gets</span>
-            <span className="block">the good ones.</span>
+            <span className="block">One night.</span>
+            <span className="block italic">One place.</span>
+            <span className="block">Everyone's photos.</span>
           </h1>
 
           <p
@@ -92,7 +92,7 @@ export default function Home() {
               animationDelay: "100ms",
             }}
           >
-            Create a private photo album for any moment. Share a link. Done.
+            No accounts. No feed. Just the shots from that thing you did.
           </p>
 
           <div
