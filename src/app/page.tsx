@@ -106,7 +106,7 @@ export default function Home() {
               href="/create"
               className="inline-block px-7 py-3.5 rounded-pill bg-accent text-white font-sans font-medium text-[15px] leading-none hover:opacity-90 active:opacity-80 transition-opacity"
             >
-              Create a stash
+              Create stash
             </Link>
             <p className="text-[13px] text-text-tertiary">No account needed. Free to use.</p>
           </div>
@@ -217,7 +217,7 @@ export default function Home() {
             href="/create"
             className="inline-block px-7 py-3.5 rounded-pill border border-white text-white font-sans font-medium text-[15px] leading-none hover:bg-white hover:text-accent transition-colors"
           >
-            Create a stash
+            Create stash
           </Link>
         </div>
       </section>
